@@ -28,8 +28,20 @@ private:
 
     sf::Text livesText, timerText, messageText;
 
-    // THAY ĐỔI: Xóa redClock và redActive
     sf::Clock deltaClock;
+
+    // === THÊM CÁC BIẾN CHO BẪY NHẤP NHÁY ===
+    sf::Clock redClock;
+    sf::Clock yellowClock;
+    bool redActive;
+    bool yellowActive;
+
+    // === THÊM CÁC BIẾN CHO HỆ THỐNG BẤT TỬ ===
+    bool isInvincible;
+    sf::Clock invincibleClock;
+    bool playerVisible;
+    // Đặt thời gian bất tử là 2.5 giây
+    const float invincibilityDuration = 2.5f;
 
     bool gameOver, win;
 
