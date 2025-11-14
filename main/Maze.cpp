@@ -24,7 +24,27 @@ void Maze::generate() {
             }
         }
         };
+    // tạo mê cung "hoàn hảo"
     dfs(1, 1);
+    std::uniform_real_distribution<> loopDis(0, 1);
+
+    // TĂNG SỐ NÀY ĐỂ CÓ NHIỀU LỐI ĐI HƠN (ví dụ: 0.3, 0.4)
+    double loopProbability = 0.3; // (0.0 = mê cung hoàn hảo, 1.0 = gần như không có tường)
+
+    for (int y = 1; y < h - 1; y++) {
+        for (int x = 1; x < w - 1; x++) {
+            // Nếu đây là một bức tường "có thể phá" (không phải là ô góc)
+            if (walls[y][x]) {
+                bool isHorizontalSeparator = (y % 2 == 0) && (x % 2 != 0);
+                bool isVerticalSeparator = (y % 2 != 0) && (x % 2 == 0);
+
+                // Nếu nó là tường ngăn ngang hoặc dọc VÀ quay random trúng
+                if ((isHorizontalSeparator || isVerticalSeparator) && (loopDis(gen) < loopProbability)) {
+                    walls[y][x] = false; // Đục thủng tường
+                }
+            }
+        }
+    }
     entrance = { 1,1 };
     exit = { w - 2,h - 2 };
 }
