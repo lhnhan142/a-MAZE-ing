@@ -32,13 +32,69 @@ void Maze::generate() {
 void Maze::generateTraps(double redP, double yellowP) {
     std::mt19937 gen(time(0));
     std::uniform_real_distribution<> dis(0, 1);
-    for (int y = 0; y < h; y++)
+
+    // Thêm bộ tạo hướng ngẫu nhiên (0 = Ngang, 1 = Dọc)
+    std::uniform_int_distribution<> dirDis(0, 1);
+
+    // === BƯỚC 1: Đặt bẫy đỏ (đặt riêng lẻ) ===
+    // Lặp qua toàn bộ mê cung
+    for (int y = 0; y < h; y++) {
         for (int x = 0; x < w; x++) {
-            if (!walls[y][x]) {
-                if (dis(gen) < redP) traps[y][x] = 1;
-                else if (dis(gen) < yellowP) traps[y][x] = 2;
+            if (!walls[y][x]) { // Nếu là đường đi
+                if (dis(gen) < redP) // Kiểm tra xác suất bẫy đỏ
+                    traps[y][x] = 1; // Đặt bẫy đỏ
             }
         }
+    }
+
+    // === BƯỚC 2: Đặt bẫy vàng (luôn theo chuỗi 3 ô) ===
+    // Lặp lại toàn bộ mê cung một lần nữa
+    for (int y = 0; y < h; y++) {
+        for (int x = 0; x < w; x++) {
+
+            // Chỉ đặt bẫy nếu:
+            // 1. Là đường đi (!walls)
+            // 2. Chưa có bẫy đỏ (traps == 0)
+            if (!walls[y][x] && traps[y][x] == 0) {
+
+                // Kiểm tra xác suất bẫy vàng
+                if (dis(gen) < yellowP) {
+
+                    int direction = dirDis(gen); // Chọn hướng ngẫu nhiên
+
+                    if (direction == 0) { // Đặt theo chiều Ngang (x, x+1, x+2)
+
+                        // Kiểm tra xem 2 ô bên phải có hợp lệ không
+                        if (x + 2 < w && // Nằm trong biên
+                            !walls[y][x + 1] && traps[y][x + 1] == 0 && // Ô (x+1) là đường đi & không có bẫy
+                            !walls[y][x + 2] && traps[y][x + 2] == 0)   // Ô (x+2) là đường đi & không có bẫy
+                        {
+                            // Nếu hợp lệ, đặt 3 bẫy vàng
+                            traps[y][x] = 2;
+                            traps[y][x + 1] = 2;
+                            traps[y][x + 2] = 2;
+                        }
+                    }
+                    else { // Đặt theo chiều Dọc (y, y+1, y+2)
+
+                        // Kiểm tra xem 2 ô bên dưới có hợp lệ không
+                        if (y + 2 < h && // Nằm trong biên
+                            !walls[y + 1][x] && traps[y + 1][x] == 0 && // Ô (y+1) là đường đi & không có bẫy
+                            !walls[y + 2][x] && traps[y + 2][x] == 0)   // Ô (y+2) là đường đi & không có bẫy
+                        {
+                            // Nếu hợp lệ, đặt 3 bẫy vàng
+                            traps[y][x] = 2;
+                            traps[y + 1][x] = 2;
+                            traps[y + 2][x] = 2;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // === BƯỚC 3: Dọn dẹp lối vào/ra ===
+    // Luôn đảm bảo lối vào và lối ra an toàn
     traps[entrance.second][entrance.first] = 0;
     traps[exit.second][exit.first] = 0;
 }
